@@ -93,6 +93,10 @@ func NewDoHNameServer(url *url.URL, dispatcher routing.Dispatcher, queryStrategy
 		s.httpClient.Transport = &http2.Transport{
 			IdleConnTimeout: 90 * time.Second,
 			DialTLSContext: func(ctx context.Context, network, addr string, cfg *tls.Config) (net.Conn, error) {
+				ctx = session.ContextWithMitmAlpn11(ctx, false) // though the ctx is not from inbound
+				if cfg != nil {
+					ctx = session.ContextWithMitmServerName(ctx, cfg.ServerName)
+				}
 				return dialContext(ctx, network, addr)
 			},
 		}
